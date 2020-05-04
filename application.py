@@ -1,9 +1,13 @@
 import os
 
-from flask import Flask, session
+from flask import Flask, jsonify, redirect, render_template, request, session
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
+
+from helpers import login_required
 
 app = Flask(__name__)
 
@@ -22,5 +26,112 @@ db = scoped_session(sessionmaker(bind=engine))
 
 
 @app.route("/")
+@login_required
 def index():
     return "Project 1: TODO"
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Log user in"""
+
+    # Forget any user_id
+    session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return render_template("error.html", message="must provide username")
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return render_template("error.html", message="must provide password")
+
+        # Query database for username
+        rows = db.execute("SELECT * FROM users WHERE username = :username",
+                          {"username": request.form.get("username")})
+
+        # Convert result into list
+        rows = [r for r in rows]
+
+        # Ensure username exists and password is correct
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+            return render_template("error.html", message="invalid username and/or password")
+
+        # Remember which user has logged in.
+        session["user_id"] = rows[0]["id"]
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/login")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """Register user"""
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return render_template("error.html", message="must provide username")
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return render_template("error.html", message="must provide password")
+
+        # Ensure password and confirmation match
+        if request.form.get("password") != request.form.get("confirmation"):
+            return render_template("error.html", message="passwords don't match")
+
+        # Generate hash of password
+        hash = generate_password_hash(request.form.get("password"))
+
+        # Insert user into users table, check for username availabilty with try
+        # except to catch the case that username already taken. Usernames
+        # are unique therefore db.execute() will fail.
+
+        try:
+            result = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)",
+                                {"username": request.form.get("username"), "hash": hash})
+            db.commit()
+        except Exception as e:
+            # print (e)
+            result = False
+
+        if not result:
+            return render_template("error.html", message="username not available")
+
+        # Log user in automatically
+        # Query database for username.
+        rows = db.execute("SELECT * FROM users WHERE username = :username",
+                          {"username": request.form.get("username")})
+
+        # Convert result into list
+        rows = [r for r in rows]
+
+        # Store user_id in session
+        session["user_id"] = rows[0]["id"]
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("register.html")
