@@ -51,12 +51,9 @@ def login():
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE username = :username",
-                          {"username": request.form.get("username")})
+                          {"username": request.form.get("username")}).fetchall()
 
-        # Convert result into list
-        rows = [r for r in rows]
-
-        # Ensure username exists and password is correct
+        # Ensure username exists and password is correct.
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
             return render_template("error.html", message="invalid username and/or password")
 
@@ -121,10 +118,10 @@ def register():
         # Log user in automatically
         # Query database for username.
         rows = db.execute("SELECT * FROM users WHERE username = :username",
-                          {"username": request.form.get("username")})
+                          {"username": request.form.get("username")}).fetchall()
 
         # Convert result into list
-        rows = [r for r in rows]
+        # rows = [r for r in rows]
 
         # Store user_id in session
         session["user_id"] = rows[0]["id"]
