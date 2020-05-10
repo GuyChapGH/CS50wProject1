@@ -28,7 +28,33 @@ db = scoped_session(sessionmaker(bind=engine))
 @app.route("/")
 @login_required
 def index():
-    return "Project 1: TODO"
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # Ensure query was submitted
+        if not request.form.get("query"):
+            return render_template("error.html", message="must provide query")
+        # Create enhanced query term
+        enh_query = "%" + request.form.get("query") + "%"
+
+        # Query books table for isbn:
+        rows_isbn = db.execute("SELECT * FROM books WHERE isbn LIKE :enh_query LIMIT 10",
+                               {"enh_query": enh_query}).fetchall()
+
+        # Query books table for title:
+        rows_title = db.execute("SELECT * FROM books WHERE title LIKE :enh_query LIMIT 10",
+                                {"enh_query": enh_query}).fetchall()
+
+        # Query books table for author:
+        rows_author = db.execute("SELECT * FROM books WHERE author LIKE :enh_query LIMIT 10",
+                                 {"enh_query": enh_query}).fetchall()
+
+        # Create complete list of books returned
+        books = rows_isbn + rows_title + rows_author
+
+        return render_template("books.html", books=books)
+
+    else:
+        return render_template("index.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
