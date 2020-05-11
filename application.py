@@ -25,7 +25,7 @@ engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
     # User reached route via POST (as by submitting a form via POST)
@@ -55,6 +55,12 @@ def index():
 
     else:
         return render_template("index.html")
+
+
+@app.route("/books/<int:book_id>", methods=["GET", "POST"])
+@login_required
+def book(book_id):
+    return render_template("book.html", book_id=book_id)
 
 
 @app.route("/login", methods=["GET", "POST"])
