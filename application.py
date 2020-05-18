@@ -60,7 +60,30 @@ def index():
 @app.route("/books/<int:book_id>", methods=["GET", "POST"])
 @login_required
 def book(book_id):
-    return render_template("book.html", book_id=book_id)
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # Ensure rating and comment was submitted
+        if not request.form.get("rating") or not request.form.get("comment"):
+            return render_template("error.html", message="must provide rating and comment")
+        # Insert rating and comment into reviews table recording for book_id and user_id
+        db.execute("INSERT INTO reviews (rating, comment, book_id, user_id) VALUES (:rating, :comment, :book_id, :user_id)",
+                   {"rating": int request.form.get("rating"), "comment": request.form.get("comment"), "book_id": book_id, "user_id": session["user_id"]})
+        db.commit()
+        # Return to book page for given book_id with reviews updated
+        return redirect("/books/book_id")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        # SELECT all book data for given book
+        book = db.execute("SELECT * FROM books WHERE id = :id",
+                          {"id": book_id}).fetchone()
+        # SELECT all reviews for given book and record user_id, and username
+        reviews = db.execute("SELECT rating, comment, book_id, user_id, username FROM books INNER JOIN reviews ON reviews.book_id = books.id INNER JOIN users ON reviews.user_id = users.id WHERE books.id = :id",
+                             {"id": book_id}).fetchall()
+        # Call goodreadsAPI for isbn of given book tupleGR = (ratingGR, number_ratingsGR)
+        tupleGR = goodreadsAPI(book.isbn)
+
+        return render_template("book.html", book=book, reviews=reviews, tupleGR=tupleGR)
 
 
 @app.route("/login", methods=["GET", "POST"])

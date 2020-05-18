@@ -20,3 +20,9 @@ def login_required(f):
             return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
+
+
+def goodreadsAPI(isbn):
+    # tupleGR = (ratingGR, number_ratingsGR)
+    tupleGR = (5.0, 10)
+    return tupleGR
