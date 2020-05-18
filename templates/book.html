@@ -5,6 +5,64 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Success</h1>
-Book_id = {{ book_id }}
+    <h1> Book details </h1>
+<p> {{book.isbn}}.  {{ book.title }} by {{ book.author}} published {{ book.year }} </p>
+<hr>
+    <h1> goodreads </h1>
+<p> Average score out of five: {{ tupleGR[0] }}, number of ratings: {{ tupleGR[1] }} </p>
+<hr>
+    <h1> Reviews </h1>
+        <ul>
+            {% for review in reviews %}
+                <li>
+                    {{ review.rating }} out of five. <br>
+                    {{ review.comment }} - {{ review.username }}
+                </li>
+            {% else %}
+                <li>
+                    No reviews found.
+                </li>
+            {% endfor %}
+        </ul>
+    <hr>
+    <h1> Review Submission </h1>
+    <form action="{{ url_for('book', book_id=book.id) }}" method="post">
+        <div class="form-group">
+            <label for="exampleFormControlTextarea1">Post your comments here.</label>
+            <textarea class="form-control" id="exampleFormControlTextarea1" name="comment" rows="3"></textarea>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="rating" id="exampleRadios1" value="1" checked>
+            <label class="form-check-label" for="exampleRadios1">
+                *
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="rating" id="exampleRadios2" value="2">
+            <label class="form-check-label" for="exampleRadios2">
+                **
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="rating" id="exampleRadios3" value="3">
+            <label class="form-check-label" for="exampleRadios3">
+                ***
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="rating" id="exampleRadios3" value="4">
+            <label class="form-check-label" for="exampleRadios3">
+                ****
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="rating" id="exampleRadios3" value="5">
+            <label class="form-check-label" for="exampleRadios3">
+                *****
+            </label>
+        </div>
+        <hr>
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+    <hr>
 {% endblock %}
