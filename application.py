@@ -63,10 +63,9 @@ def book(book_id):
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
         # Ensure rating and comment was submitted
-        # if not request.form.get("rating") or not request.form.get("comment"):
-        if not request.form.get("comment"):
+        if not request.form.get("rating") or not request.form.get("comment"):
             return render_template("error.html", message="must provide rating and comment")
-        # Insert rating and comment into reviews table recording for book_id and user_id
+        # Insert rating and comment into reviews table, recording for book_id and user_id
         db.execute("INSERT INTO reviews (rating, comment, book_id, user_id) VALUES (:rating, :comment, :book_id, :user_id)",
                    {"rating": int(request.form.get("rating")), "comment": request.form.get("comment"), "book_id": book_id, "user_id": session["user_id"]})
         db.commit()
