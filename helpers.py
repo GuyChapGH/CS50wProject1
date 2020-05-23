@@ -5,7 +5,7 @@ from functools import wraps
 
 
 # Store sensitive key in separate file
-# from projectkey import API_KEY
+from projectkey import API_KEY
 
 
 def login_required(f):
@@ -23,6 +23,15 @@ def login_required(f):
 
 
 def goodreadsAPI(isbn):
-    # tupleGR = (ratingGR, number_ratingsGR)
-    tupleGR = (5.0, 10)
+    # Request data from Goodreads API
+    res = requests.get("https://www.goodreads.com/book/review_counts.json",
+                       params={"key": API_KEY, "isbns": isbn})
+    # If data request not successful return false
+    if res.status_code != 200:
+        return False
+    # If successful, access data from dictionary and return
+    data = res.json()
+    ratingGR = data['books'][0]['average_rating']
+    number_ratingsGR = data['books'][0]['work_ratings_count']
+    tupleGR = (ratingGR, number_ratingsGR)
     return tupleGR

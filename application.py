@@ -80,7 +80,7 @@ def book(book_id):
         # SELECT all reviews for given book and record user_id, and username
         reviews = db.execute("SELECT rating, comment, book_id, user_id, username FROM books INNER JOIN reviews ON reviews.book_id = books.id INNER JOIN users ON reviews.user_id = users.id WHERE books.id = :id",
                              {"id": book_id}).fetchall()
-        # Call goodreadsAPI for isbn of given book tupleGR = (ratingGR, number_ratingsGR)
+        # Call goodreadsAPI for isbn of given book tupleGR = (ratingGR, number_ratingsGR). Returns False if no data available.
         tupleGR = goodreadsAPI(book.isbn)
 
         return render_template("book.html", book=book, reviews=reviews, tupleGR=tupleGR)
