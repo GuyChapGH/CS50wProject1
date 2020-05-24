@@ -86,6 +86,38 @@ def book(book_id):
         return render_template("book.html", book=book, reviews=reviews, tupleGR=tupleGR)
 
 
+@app.route("/api/<isbn>", methods=["GET"])
+def book_api(isbn):
+    # Return details about a book
+    # Check book exists in database
+    book = db.execute("SELECT * FROM books WHERE isbn = :isbn", {"isbn": isbn}).fetchone()
+    if book is None:
+        return jsonify({"error 404": "invalid book isbn"}), 404
+    # Get book details, number of reviews and average score of ratings
+    title = book["title"]
+    author = book["author"]
+    year = book["year"]
+    isbn = book["isbn"]
+    review_count = db.execute(
+        "SELECT COUNT(*) FROM books INNER JOIN reviews ON reviews.book_id = books.id WHERE books.id = :id", {"id": book["id"]}).fetchall()
+    average_score = db.execute("SELECT AVG(rating) FROM books INNER JOIN reviews ON reviews.book_id = books.id WHERE books.id = :id", {
+                               "id": book["id"]}).fetchall()
+    # Need to handle the case of zero reviews which returns None.
+    # In this case set average_score to 0.0 else format the average_score to one decimal place
+    if average_score[0]["avg"] is None:
+        average_score = 0.0
+    else:
+        average_score = "{:.1f}".format(average_score[0]["avg"])
+    return jsonify({
+        "title": title,
+        "author": author,
+        "year": year,
+        "isbn": isbn,
+        "review_count": review_count[0]["count"],
+        "average_score": average_score
+    })
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
