@@ -9,7 +9,7 @@ This project uses Python with Flask micro framework and PostgreSQL database to p
 
 WEB PAGES
 
-There are three pages to access the books and reviews: Book Search (home page), Search Results page and Book page. The information displayed on the Book page has been gathered from the database and the Goodreads API.
+There are three pages to access the books and reviews: Book Search (home page), Search Results page and Book details page. The information displayed on the Book details page has been gathered from the database and the Goodreads API.
 
 FILES
 
@@ -19,13 +19,17 @@ There are twelve files:
 
 a) website registration, login, logout routes,
 
-b) Search route (also the index route) which takes form input (ISBN, book title or book author) and returns book search results and
+b) Book Search route (the index route) which takes form input (ISBN, book title or book author) and returns book search results and
 
-c) Book results ("books/<int: book_id>" route) which, for a specific book, displays book details, book reviews, Goodreads API review data and takes the form input for new reviews. Also
+c) Book details ("books/<int: book_id>" route) which, for a specific book, displays book details, book reviews, Goodreads API review data and takes the form input for new reviews. Also
 
 d) website API route, this returns details of books, book ratings and review count for a given ISBN.
 
-2) helpers.py: This contains two useful functions. These are the login_required decorator (borrowed from CS50 Finance Problem Set). This ensures that the user must be logged in to access the Search and Search results routes. And the goodreadsAPI function that accesses book data from the Goodreads website. Note: to access the Goodreads API requires a 'key'. This is stored separately in the file projectkey.py as 'API_KEY'. For security, this file is not submitted.
+2) helpers.py: This contains two useful functions.
+
+These are the login_required decorator (borrowed from CS50 Finance Problem Set). This ensures that the user must be logged in to access the Book Search and Book details routes.
+
+And the goodreadsAPI function that accesses book data from the Goodreads website. Note: to access the Goodreads API requires a 'key'. This is stored separately in the file projectkey.py as 'API_KEY'. For security, this file is not submitted.
 
 3) import.py: This file is separate from the website files. It was used specifically to import books data into the PostgreSQL database and works on the '.csv' file, books.csv. Note: three tables were created in the database. These are users, books and reviews tables. They were created using the 'psql' command line interface.
 
